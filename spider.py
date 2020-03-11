@@ -38,6 +38,7 @@ def main(argv):
             print('[Error]: lack of parameter or invalid argument, please use \'-h\' for help')
             exit()
     if start_page == -1 or end_page == -1:
+
         print('[Error]: lack of parameter or invalid argument, please use \'-h\' for help')
         exit()
     fin_anime = [[], [], [], [], [], []]
@@ -49,7 +50,7 @@ def main(argv):
 
     # 20 anime per page
     try:
-        for page in range(start_page-1, end_page):
+        for page in range(int(start_page)-1, int(end_page)):
             print('get page:' + str(page + 1))
             one_page = get_fin_anime(page)
             for title in one_page[0]:
