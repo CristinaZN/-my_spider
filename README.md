@@ -13,7 +13,7 @@ and form a data set called 'bilibili_fin_anime.csv'
 ### Get the spider
 
 ```
-$ git clone 
+$ git clone https://github.com/CristinaZN/-my_spider.git
 ```
 
 ### Environment setup
