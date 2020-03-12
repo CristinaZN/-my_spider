@@ -38,7 +38,6 @@ def main(argv):
             print('[Error]: lack of parameter or invalid argument, please use \'-h\' for help')
             exit()
     if start_page == -1 or end_page == -1:
-
         print('[Error]: lack of parameter or invalid argument, please use \'-h\' for help')
         exit()
     fin_anime = [[], [], [], [], [], []]
@@ -49,32 +48,37 @@ def main(argv):
     #   fin_anime[4] = av_num
 
     # 20 anime per page
-    try:
-        for page in range(int(start_page)-1, int(end_page)):
-            print('get page:' + str(page + 1))
-            one_page = get_fin_anime(page)
-            for title in one_page[0]:
-                fin_anime[0].append(title)
-            for param in one_page[1]:
-                fin_anime[1].append(param)
-            for tag in one_page[2]:
-                fin_anime[2].append(tag)
-            for seiyuu in one_page[3]:
-                fin_anime[3].append(seiyuu)
-            for av_num in one_page[4]:
-                fin_anime[4].append(av_num)
-            # for img_url in one_page[5]:
-            #     fin_anime[5].append(img_url)
-    except:
-        print("[Error]: lack of parameter or invalid argument, please use \'-h\' for help")
-        exit()
+    this_page = 0
+    # try:
+    for page in range(int(start_page) - 1, int(end_page)):
+        this_page = page
+        print('==================================================')
+        print('WW                get page:' + str(page + 1) + "                  WW")
+        print('==================================================')
+        one_page = get_fin_anime(page)
+        for title in one_page[0]:
+            fin_anime[0].append(title)
+        for param in one_page[1]:
+            fin_anime[1].append(param)
+        for tag in one_page[2]:
+            fin_anime[2].append(tag)
+        for seiyuu in one_page[3]:
+            fin_anime[3].append(seiyuu)
+        for av_num in one_page[4]:
+            fin_anime[4].append(av_num)
+        # for img_url in one_page[5]:
+        #     fin_anime[5].append(img_url)
+    # except Exception as e:
+    #     print(e)
+    #     print("[Error]: Page " + str(this_page+1) + " cannot be well analyzed.")
+    #     exit()
     # form csv
     form_csv(fin_anime)
 
 
 def form_csv(fin_anime):
-    headers = ['title', 'views', 'bullet_comment', 'fans',
-               'score', 'tags', 'seiyuu', 'av_num']
+    # headers = ['title', 'views', 'bullet_comment', 'fans',
+    #            'score', 'tags', 'seiyuu', 'av_num']
     data = [[], [], [], [], [], [], [], []]
     for title in fin_anime[0]:
         data[0].append(title)
@@ -95,13 +99,20 @@ def form_csv(fin_anime):
         data[7].append(av_num)
 
     rows = []
-    for i in range(len(data[0])):
-        rows.append([data[0][i], data[1][i], data[2][i], data[3][i], data[4][i]
-                        ,data[5][i], data[6][i], data[7][i]])
-    with open('bilibili_fin_anime.csv', 'w', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        writer.writerow(headers)
-        writer.writerows(rows)
+    try:
+        for i in range(len(data[0])):
+            rows.append([data[0][i], data[1][i], data[2][i], data[3][i], data[4][i]
+                            , data[5][i], data[6][i], data[7][i]])
+    except IndexError as e:
+        print(e)
+        exit()
+    try:
+        with open('bilibili_fin_anime.csv', 'a', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            # writer.writerow(headers)
+            writer.writerows(rows)
+    except Exception as e:
+        print(e)
 
     #   download cover
     # for anime in rows:
@@ -115,6 +126,7 @@ def get_fin_anime(page):
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument('blink-settings=imagesEnabled=false')
+    chrome_options.add_argument('log-level=3')
     # browser = webdriver.Chrome(chrome_options=chrome_options)
     anime_num = 0
     fin_anime_list = []
@@ -139,7 +151,6 @@ def get_fin_anime(page):
     v_info_list = soup.find_all('span', class_="v-info-i")
     titles = soup.find_all('a', class_='title')
     av_No = soup.find_all('div', class_='l-item')
-    print(av_No, len(av_No))
     href_re = re.compile(r'www.bilibili.com/video/av\d*')
     av_re = re.compile(r'av\d*')
     title_re = re.compile(r'>.*')
@@ -164,11 +175,14 @@ def get_fin_anime(page):
             param_set.append([str(view).lstrip('\'[<span><div>').rstrip('</span></div>\']'),
                               str(comment).lstrip('\'[<span><div>').rstrip('</span></div>\']')])
     browser.close()
-    print('get titles')
+    print('================================================================================')
+    print('WW                                   get titles                              WW ')
+    print('================================================================================')
     print(title_list)
-
+    print('================================================================================')
     #   get intro page of every anime
-    print('waiting for getting intro_page urls, about 4 min based on your network')
+    print('      waiting for getting intro_page urls, about 4 min based on your network    ')
+    print('================================================================================')
     href_counter = 0
     intro_page_list = []
     for href_item in href_list:
@@ -181,12 +195,15 @@ def get_fin_anime(page):
         intro_soup = bs4.BeautifulSoup(browser.page_source, 'lxml')
         intro_div_list = intro_soup.find_all('div', class_='media-info clearfix report-wrap-module')
         intro_href_re = re.compile(r'www.bilibili.com/bangumi/media/md\d*/')
-        for div in intro_div_list:
-            intro_page = intro_href_re.findall(str(div))
-            if len(intro_page) >= 1:
-                intro_page_list.append(intro_page[0])
-            else:
-                intro_page_list.append("Null")
+        if len(intro_div_list) == 0:
+            intro_page_list.append("Null")
+        else:
+            for div in intro_div_list:
+                intro_page = intro_href_re.findall(str(div))
+                if len(intro_page) >= 1:
+                    intro_page_list.append(intro_page[0])
+                else:
+                    intro_page_list.append("Null")
         browser.close()
 
     #   get tags, scores, fans_num, seiyuu of every anime
@@ -203,10 +220,17 @@ def get_fin_anime(page):
             else:
                 score = detail_soup.find_all('div', class_='media-info-score-content')[0]
             fans = detail_soup.find_all('em')[1]
-            seiyuu = str(detail_soup.find_all('span', style='opacity: 0;')[0]). \
-                lstrip(' <span class="hide" style="opacity: 0;">').rstrip('</p></span>')
-            print("get Seiyuus" + str(anime_num + 1) + '/20')
+            print(type(detail_soup.find_all('span', style='opacity: 0;')))
+            if len(detail_soup.find_all('span', style='opacity: 0;')) <= 1:
+                seiyuu = str(detail_soup.find_all('span', style='opacity: 0;')).\
+                    lstrip(' <span class="hide" style="opacity: 0;">').rstrip('</p></span>')
+            else:
+                seiyuu = str(detail_soup.find_all('span', style='opacity: 0;')[0]). \
+                    lstrip(' <span class="hide" style="opacity: 0;">').rstrip('</p></span>')
+            print('================================================================================')
+            print("WW                        get Seiyuus" + str(anime_num + 1) + '/20                               WW')
             print(seiyuu)
+            print('================================================================================')
             tag_list = []
             for tag in tags:
                 tag_list.append(str(tag)[24:len(tag) - 8])
@@ -216,17 +240,22 @@ def get_fin_anime(page):
             anime_num += 1
             seiyuu_set.append(seiyuu)
         else:
+            print("WW                           get Null intro page                              WW")
             tag_set.append(['Null'])
             param_set[anime_num].append('Null')
             param_set[anime_num].append('Null')
             seiyuu_set.append('Null')
             anime_num += 1
+    print('================================================================================')
     print("get param:  ['views_num','bullet_comment_num','fans_num','score']")
     print(param_set)
+    print('================================================================================')
     print("get_tags")
     print(tag_set)
+    print('================================================================================')
     return [title_list, param_set, tag_set, seiyuu_set, av_num_list]
 
 
 if __name__ == '__main__':
     main(sys.argv[1:])
+
