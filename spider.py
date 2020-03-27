@@ -49,29 +49,29 @@ def main(argv):
 
     # 20 anime per page
     this_page = 0
-    try:
-        for page in range(int(start_page) - 1, int(end_page)):
-            this_page = page
-            print('==================================================')
-            print('WW                get page:' + str(page + 1) + "                  WW")
-            print('==================================================')
-            one_page = get_fin_anime(page)
-            for title in one_page[0]:
-                fin_anime[0].append(title)
-            for param in one_page[1]:
-                fin_anime[1].append(param)
-            for tag in one_page[2]:
-                fin_anime[2].append(tag)
-            for seiyuu in one_page[3]:
-                fin_anime[3].append(seiyuu)
-            for av_num in one_page[4]:
-                fin_anime[4].append(av_num)
-            # for img_url in one_page[5]:
-            #     fin_anime[5].append(img_url)
-    except Exception as e:
-        print(e)
-        print("[Error]: Page " + str(this_page+1) + " cannot be well analyzed.")
-        exit()
+    # try:
+    for page in range(int(start_page) - 1, int(end_page)):
+        this_page = page
+        print('==================================================')
+        print('WW                get page:' + str(page + 1) + "                  WW")
+        print('==================================================')
+        one_page = get_fin_anime(page)
+        for title in one_page[0]:
+            fin_anime[0].append(title)
+        for param in one_page[1]:
+            fin_anime[1].append(param)
+        for tag in one_page[2]:
+            fin_anime[2].append(tag)
+        for seiyuu in one_page[3]:
+            fin_anime[3].append(seiyuu)
+        for av_num in one_page[4]:
+            fin_anime[4].append(av_num)
+        # for img_url in one_page[5]:
+        #     fin_anime[5].append(img_url)
+    # except Exception as e:
+    #     print(e)
+    #     print("[Error]: Page " + str(this_page+1) + " cannot be well analyzed.")
+    #     exit()
     # form csv
     form_csv(fin_anime)
 
@@ -151,14 +151,16 @@ def get_fin_anime(page):
     v_info_list = soup.find_all('span', class_="v-info-i")
     titles = soup.find_all('a', class_='title')
     av_No = soup.find_all('div', class_='l-item')
-    href_re = re.compile(r'www.bilibili.com/video/av\d*')
-    av_re = re.compile(r'av\d*')
+    href_re = re.compile(r'www.bilibili.com/video/[avBV][\d\w]*')
+    av_re = re.compile(r'[avBV][\d\w]*')
     title_re = re.compile(r'>.*')
     v_info_re = re.compile(r'<span>.*')
     # img_re = re.compile(r'src="[\w\d.@]*')
     for div in div_list:
+        # print(div)
         href = href_re.findall(str(div))
         href_list.append(href[0])
+        print("test" + str(href[0]))
     for item in titles:
         name = title_re.findall(str(item))[0]
         title_list.append(str(name).lstrip('>').rstrip('</a>'))
