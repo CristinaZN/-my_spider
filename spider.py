@@ -8,6 +8,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 
+
 def main(argv):
     # default args
     start_page = -1
@@ -151,8 +152,8 @@ def get_fin_anime(page):
     v_info_list = soup.find_all('span', class_="v-info-i")
     titles = soup.find_all('a', class_='title')
     av_No = soup.find_all('div', class_='l-item')
-    href_re = re.compile(r'www.bilibili.com/video/[avBV][\d\w]*')
-    av_re = re.compile(r'[avBV][\d\w]*')
+    href_re = re.compile(r'www.bilibili.com/video/[aB][vV][\d\w]*')
+    av_re = re.compile(r'[aB][vV][\d\w]*')
     title_re = re.compile(r'>.*')
     v_info_re = re.compile(r'<span>.*')
     # img_re = re.compile(r'src="[\w\d.@]*')
@@ -160,7 +161,7 @@ def get_fin_anime(page):
         # print(div)
         href = href_re.findall(str(div))
         href_list.append(href[0])
-        print("test" + str(href[0]))
+        # print("test" + str(href[0]))
     for item in titles:
         name = title_re.findall(str(item))[0]
         title_list.append(str(name).lstrip('>').rstrip('</a>'))
@@ -183,7 +184,7 @@ def get_fin_anime(page):
     print(title_list)
     print('================================================================================')
     #   get intro page of every anime
-    print('      waiting for getting intro_page urls, about 4 min based on your network    ')
+    print('      waiting for getting intro_page urls, about 10 min based on your network   ')
     print('================================================================================')
     href_counter = 0
     intro_page_list = []
@@ -221,6 +222,7 @@ def get_fin_anime(page):
                 score = '<div class="media-info-score-content"> Null </div>'
             else:
                 score = detail_soup.find_all('div', class_='media-info-score-content')[0]
+            print(detail_soup.find_all('em'))
             fans = detail_soup.find_all('em')[1]
             print(type(detail_soup.find_all('span', style='opacity: 0;')))
             if len(detail_soup.find_all('span', style='opacity: 0;')) <= 1:
@@ -238,9 +240,9 @@ def get_fin_anime(page):
                 tag_list.append(str(tag)[24:len(tag) - 8])
             tag_set.append(tag_list)
             param_set[anime_num].append(str(fans).lstrip('<em>').rstrip('</em>'))
-            param_set[anime_num].append(str(score).lstrip('<div class="media-info-score-content">').rstrip('</div>'))
+            param_set[anime_num].append(str(score).lstrip('<div class="media-info-score-content">').rstrip(' </div>'))
             anime_num += 1
-            seiyuu_set.append(seiyuu)
+            seiyuu_set.append(seiyuu.translate(str.maketrans("<br\\>", "     ")))
         else:
             print("WW                           get Null intro page                              WW")
             tag_set.append(['Null'])
@@ -256,6 +258,7 @@ def get_fin_anime(page):
     print(tag_set)
     print('================================================================================')
     return [title_list, param_set, tag_set, seiyuu_set, av_num_list]
+
 
 
 if __name__ == '__main__':
